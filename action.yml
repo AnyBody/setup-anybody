@@ -76,12 +76,12 @@ runs:
       with:
         environment-name: anybody-python
         create-args: >-
-          python=3.11
+          --no-default-packages python=3.11
         cache-environment: true
 
     - uses: mamba-org/setup-micromamba@v1
-      name: Install custom Python evrionment
-      if: ${{ ! contains(fromJSON('["full", "minimal", ""]'), inputs.python-environment ) }}
+      name: Install custom Python environment
+      if: ${{ ! contains(fromJSON('["full", "minimal", "", "None"]'), inputs.python-environment ) }}
       with:
         environment-name: anybody-python
         environment-file: ${{ inputs.python-environment }}
