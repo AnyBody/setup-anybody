@@ -4,66 +4,73 @@ inputs:
   anybody-version:  # id of input
     description: 'The version of AnyBody to install'
     required: true
-    default: '7.5'
-  anybody-version-patch:  # id of input
-    description: 'The minor version of AnyBody to install'
-    required: true
-    default: '0'
+    default: '7.5.0'
   anybody-version-suffix:  # id of input
-    description: 'The version of AnyBody to install'
+    description: 'The version suffix of AnyBody to install (e.g. beta)'
     required: false
     default: ''
   anybody-version-build:  # id of input
     description: 'The build number of the AnyBody to install'
     required: false
     default: ''
-
-  # anybody-license:  # id of input
-  #   description: 'The <port>@<host> of the AnyBody license server'
-  #   required: true
-  # anybody-license-password:  # id of input
-  #   description: 'The password of the AnyBody license server'
-  #   required: true
-  anybody-python-environment: 
+  python-environment: 
     description: 'An environment.yml file with the python environment used by AnyBody'
     required: false
     default: ''
-outputs:
-  random-number:
-    description: "Random number"
-    value: ${{ steps.random-number-generator.outputs.random-number }}
 
 runs:
-  using: "composite"
+  using: "Composite"
   steps:
-    - name: Create AnyBody Folders
+
+    - name: Split version number
+      shell: pwsh
       run: |
-        mkdir "$HOME/AnyBody Technology
-        mkdir "$HOME/AnyBody Technology/AnyBody.${{ inputs.anybody-version }}${{ inputs.anybody-version-suffix }}"
-        Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_INSTALL_DIR=$HOME/AnyBody Technology/AnyBody.${{ inputs.anybody-version }}${{ inputs.anybody-version-suffix }}"
+        $ver = "${{ inputs.anybody-version }}".split(".")
+        Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_VERSION=$($ver[0]).$($ver[1])"
+        Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_VERSION_PATCH=$($ver[2])"
+        Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_VERSION_SUFFIX=${{ inputs.anybody-version-suffix }}"
+        if ("${{ inputs.anybody-version-suffix }}" -eq "")
+        {
+          Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_VERSION_UNDERSCORE_SUFFIX="
+        }
+        else
+        {
+          Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_VERSION_UNDERSCORE_SUFFIX=_${{ inputs.anybody-version-suffix }}"
+        }
+        Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_VERSION_BUILD=${{ inputs.anybody-version-build }}"
+
+
+    - name: Create AnyBody Folders
+      shell: pwsh
+      run: |
+        mkdir "$HOME/AnyBody Technology"
+        mkdir "$HOME/AnyBody Technology/AnyBody.$($env:ANYBODY_VERSION)_$env:ANYBODY_VERSION_UNDERSCORE_SUFFIX"
+        Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_INSTALL_DIR=$HOME/AnyBody Technology/AnyBody.$env:ANYBODY_VERSION$env:ANYBODY_VERSION_UNDERSCORE_SUFFIX"
 
     - name: Exlude AnyBody from Windows Defender
+      shell: pwsh
       run: | 
         Add-MpPreference -ExclusionPath $env:ANYBODY_INSTALL_DIR
         Add-MpPreference -ExclusionPath $HOME/micromamba/envs
 
     
     - name: Download and extract AnyBody
+      shell: pwsh
       run: |
-        $url = "https://anybodycloudci.blob.core.windows.net/windows-anybodycon/anybody-minimal-${{ inputs.anybody-version }}.${{ inputs.anybody-version-patch }}${{ inputs.anybody-version-suffix }}${{ inputs.anybody-version-build }}.zip"
+        $url = "https://anybodycloudci.blob.core.windows.net/windows-anybodycon/anybody-minimal-$env:ANYBODY_VERSION.$env:ANYBODY_VERSION_PATCH$env:ANYBODY_VERSION_UNDERSCORE_SUFFIX$env:ANYBODY_VERSION_BUILD.zip"
         Invoke-WebRequest -Uri $url -OutFile "$HOME/AnyBody.zip"
         Add-Type -Assembly System.IO.Compression.FileSystem
         [System.IO.Compression.ZipFile]::ExtractToDirectory("$HOME/AnyBody.zip", $env:ANYBODY_INSTALL_DIR)   
         
     - uses: mamba-org/setup-micromamba@v1
-      if: ${{ inputs.anybody-python-environment }} != ""
+      if: ${{ inputs.python-environment == 'full' }}
       with:
-        environment-file: ${{ inputs.anybody-python-environment }}
+        environment-file: $env:ANYBODY_INSTALL_DIR/Assist/conda-lock.yml
         cache-environment: true
         environment-name: anybody-python
     
     - uses: mamba-org/setup-micromamba@v1
-      if: ${{ inputs.anybody-python-environment }} == ""
+      if: ${{ inputs.python-environment == 'minimal' }}
       with:
         environment-name: anybody-python
         create-args: >-
@@ -71,7 +78,15 @@ runs:
           numpy
         cache-environment: true
 
+    - uses: mamba-org/setup-micromamba@v1
+      if: ${{ inputs.python-environment != '' }}
+      with:
+        environment-name: anybody-python
+        environment-file: ${{ inputs.python-environment }}
+        cache-environment: true        
+
     - name: Set Python environment for AnyBody
+      shell: pwsh
       run: Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_PATH_PYTHONHOME=$HOME\micromamba-root\envs\anybody-python"
 
     # - name: Set AnyBody license and password
@@ -80,16 +95,17 @@ runs:
     #     Add-Content -Path $env:GITHUB_ENV -Value "RLM_LICENSE_PASSWORD=${{ inputs.anybody-license-password }}"
 
     - name: Add AnyBody to registry
+      shell: pwsh
       run:  |        
         $registryPath = "Registry::HKEY_CLASSES_ROOT\AnyBody.AnyScript\shell\Open\command"
         New-Item -Path $registryPath -Force
-        Set-ItemProperty -Path $registryPath -Name "(Default)" -Value "`"$HOME\ANYBODY\AnyBody.exe`" `"%1`""
+        Set-ItemProperty -Path $registryPath -Name "(Default)" -Value "`"$($env:ANYBODY_INSTALL_DIR)\AnyBody.exe`" `"%1`""
 
-        $suffix= "${{ inputs.anybody-version-suffix }}".replace("_", " ")
-        $registryPath = "HKLM:\SOFTWARE\AnyBody Technology\AnyBody.${{ inputs.anybody-version }} (64-bit)${suffix}"
+        $registryPath = "HKLM:\SOFTWARE\AnyBody Technology\AnyBody.${{ inputs.anybody-version }} (64-bit) $env:ANYBODY_VERSION_SUFFIX".trim()
         New-Item -Path $registryPath -Force
-        New-ItemProperty -Path $registryPath -Name "InstallDir" -PropertyType REG_SZ -Value "$env:ANYBODY_INSTALL_DIR"
+        New-ItemProperty -Path $registryPath -Name "InstallDir" -Value "$env:ANYBODY_INSTALL_DIR"
 
     - name: Add AnyBodyCon to path
+      shell: pwsh
       run: |
         Add-Content -Path $env:GITHUB_PATH -Value "$env:ANYBODY_INSTALL_DIR"

@@ -15,12 +15,11 @@ jobs:
     steps:
         - uses: actions/checkout@v4
 
-        - uses: anybody\setup-anybody@main
+        - uses: anybody/setup-anybody@main
           with:
-            anybody-version: "7.5"
-            anybody-version-patch: "0"
-            anybody-version-suffix: "_Beta"
-            anybody-version-build: "6"
+            anybody-version: "7.5.0"
+            anybody-version-suffix: "Beta"
+            python-environment: "minimal"
 
         - name: Run AnyBodyCon
           env:
