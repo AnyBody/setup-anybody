@@ -63,6 +63,7 @@ runs:
         [System.IO.Compression.ZipFile]::ExtractToDirectory("$HOME/AnyBody.zip", $env:ANYBODY_INSTALL_DIR)   
         
     - uses: mamba-org/setup-micromamba@v1
+      name: Install full Python evrionment
       if: ${{ inputs.python-environment == 'full' }}
       with:
         environment-file: $env:ANYBODY_INSTALL_DIR/Assist/conda-lock.yml
@@ -70,16 +71,17 @@ runs:
         environment-name: anybody-python
     
     - uses: mamba-org/setup-micromamba@v1
+      name: Install minimal Python evrionment
       if: ${{ inputs.python-environment == 'minimal' }}
       with:
         environment-name: anybody-python
         create-args: >-
           python=3.11
-          numpy
         cache-environment: true
 
     - uses: mamba-org/setup-micromamba@v1
-      if: ${{ inputs.python-environment != '' }}
+      name: Install custom Python evrionment
+      if: ${{ ! contains(fromJSON('["full", "minimal", ""]'), inputs.python-environment ) }}
       with:
         environment-name: anybody-python
         environment-file: ${{ inputs.python-environment }}
