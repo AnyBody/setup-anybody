@@ -76,7 +76,7 @@ runs:
       with:
         environment-name: anybody-python
         create-args: >-
-          --no-default-packages python=3.11
+          python=3.11
         cache-environment: true
 
     - uses: mamba-org/setup-micromamba@v1
