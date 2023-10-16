@@ -1,0 +1,31 @@
+name: CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+        - uses: actions/checkout@v4
+
+        - uses: anybody\setup-anybody@main
+          with:
+            anybody-version: "7.5"
+            anybody-version-patch: "0"
+            anybody-version-suffix: "_Beta"
+            anybody-version-build: "6"
+
+        - name: Run AnyBodyCon
+          env:
+            RLM_LICENSE: ${{ secrets.RLM_LICENSE }}
+            RLM_LICENSE_PASSWORD: ${{ secrets.RLM_LICENSE_PASSWORD }}
+          run: |
+              anybodycon /ni
+        

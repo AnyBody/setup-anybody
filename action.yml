@@ -1,0 +1,95 @@
+name: 'Setup AnyBody'
+description: 'Setup AnyBody on GitHub Windows hosted runners'
+inputs:
+  anybody-version:  # id of input
+    description: 'The version of AnyBody to install'
+    required: true
+    default: '7.5'
+  anybody-version-patch:  # id of input
+    description: 'The minor version of AnyBody to install'
+    required: true
+    default: '0'
+  anybody-version-suffix:  # id of input
+    description: 'The version of AnyBody to install'
+    required: false
+    default: ''
+  anybody-version-build:  # id of input
+    description: 'The build number of the AnyBody to install'
+    required: false
+    default: ''
+
+  # anybody-license:  # id of input
+  #   description: 'The <port>@<host> of the AnyBody license server'
+  #   required: true
+  # anybody-license-password:  # id of input
+  #   description: 'The password of the AnyBody license server'
+  #   required: true
+  anybody-python-environment: 
+    description: 'An environment.yml file with the python environment used by AnyBody'
+    required: false
+    default: ''
+outputs:
+  random-number:
+    description: "Random number"
+    value: ${{ steps.random-number-generator.outputs.random-number }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Create AnyBody Folders
+      run: |
+        mkdir "$HOME/AnyBody Technology
+        mkdir "$HOME/AnyBody Technology/AnyBody.${{ inputs.anybody-version }}${{ inputs.anybody-version-suffix }}"
+        Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_INSTALL_DIR=$HOME/AnyBody Technology/AnyBody.${{ inputs.anybody-version }}${{ inputs.anybody-version-suffix }}"
+
+    - name: Exlude AnyBody from Windows Defender
+      run: | 
+        Add-MpPreference -ExclusionPath $env:ANYBODY_INSTALL_DIR
+        Add-MpPreference -ExclusionPath $HOME/micromamba/envs
+
+    
+    - name: Download and extract AnyBody
+      run: |
+        $url = "https://anybodycloudci.blob.core.windows.net/windows-anybodycon/anybody-minimal-${{ inputs.anybody-version }}.${{ inputs.anybody-version-patch }}${{ inputs.anybody-version-suffix }}${{ inputs.anybody-version-build }}.zip"
+        Invoke-WebRequest -Uri $url -OutFile "$HOME/AnyBody.zip"
+        Add-Type -Assembly System.IO.Compression.FileSystem
+        [System.IO.Compression.ZipFile]::ExtractToDirectory("$HOME/AnyBody.zip", $env:ANYBODY_INSTALL_DIR)   
+        
+    - uses: mamba-org/setup-micromamba@v1
+      if: ${{ inputs.anybody-python-environment }} != ""
+      with:
+        environment-file: ${{ inputs.anybody-python-environment }}
+        cache-environment: true
+        environment-name: anybody-python
+    
+    - uses: mamba-org/setup-micromamba@v1
+      if: ${{ inputs.anybody-python-environment }} == ""
+      with:
+        environment-name: anybody-python
+        create-args: >-
+          python=3.11
+          numpy
+        cache-environment: true
+
+    - name: Set Python environment for AnyBody
+      run: Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_PATH_PYTHONHOME=$HOME\micromamba-root\envs\anybody-python"
+
+    # - name: Set AnyBody license and password
+    #   run: |
+    #     Add-Content -Path $env:GITHUB_ENV -Value "RLM_LICENSE=${{ inputs.anybody-license }}"
+    #     Add-Content -Path $env:GITHUB_ENV -Value "RLM_LICENSE_PASSWORD=${{ inputs.anybody-license-password }}"
+
+    - name: Add AnyBody to registry
+      run:  |        
+        $registryPath = "Registry::HKEY_CLASSES_ROOT\AnyBody.AnyScript\shell\Open\command"
+        New-Item -Path $registryPath -Force
+        Set-ItemProperty -Path $registryPath -Name "(Default)" -Value "`"$HOME\ANYBODY\AnyBody.exe`" `"%1`""
+
+        $suffix= "${{ inputs.anybody-version-suffix }}".replace("_", " ")
+        $registryPath = "HKLM:\SOFTWARE\AnyBody Technology\AnyBody.${{ inputs.anybody-version }} (64-bit)${suffix}"
+        New-Item -Path $registryPath -Force
+        New-ItemProperty -Path $registryPath -Name "InstallDir" -PropertyType REG_SZ -Value "$env:ANYBODY_INSTALL_DIR"
+
+    - name: Add AnyBodyCon to path
+      run: |
+        Add-Content -Path $env:GITHUB_PATH -Value "$env:ANYBODY_INSTALL_DIR"
