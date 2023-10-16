@@ -4,7 +4,7 @@
 
 GitHub Action to setup the console version the [AnyBody Modeling System](https://anybodytech.com) on Windows based GitHub actions runners.
 
-For similar actions for linux machines, please see [anybodycon-action](https://github.com/AnyBody/anybodycon-action), or the [AnyBody docker containers}(https://github.com/AnyBody/anybody-container/pkgs/container/anybodycon).
+For similar actions for linux machines, please see [anybodycon-action](https://github.com/AnyBody/anybodycon-action), or the [AnyBody docker containers](https://github.com/AnyBody/anybody-container/pkgs/container/anybodycon).
 
 
 ## Usage
@@ -26,6 +26,8 @@ For similar actions for linux machines, please see [anybodycon-action](https://g
 
 ## Features
 
+The `anybodycon.exe` application is installed under `$HOME\AnyBody Technology\AnyBody 7.5\` and the folder is added to the path.
+
 The available inputs are:
 
 * **anybody-version**: The version of AnyBody to install. E.g. `7.5.0`.
@@ -33,6 +35,7 @@ The available inputs are:
 * **python-environment**: The python environment to install. E.g. `full` or `minimal`, `None`. Default: `None`.
 
 The `python-environment` input can also specify a "environment.yml" file to install a custom python environment.
+
 
 # AnyBody license server
 
