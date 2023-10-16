@@ -81,20 +81,27 @@ runs:
 
     - uses: mamba-org/setup-micromamba@v1
       name: Install custom Python environment
-      if: ${{ ! contains(fromJSON('["full", "minimal", "", "None"]'), inputs.python-environment ) }}
+      if: ${{ ! contains(fromJSON('["full", "minimal", "", "none"]'), inputs.python-environment ) }}
       with:
         environment-name: anybody-python
         environment-file: ${{ inputs.python-environment }}
         cache-environment: true        
 
-    - name: Set Python environment for AnyBody
+    - name: Prepare Python environment for AnyBody
       shell: pwsh
-      run: Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_PATH_PYTHONHOME=$HOME\micromamba-root\envs\anybody-python"
-
-    # - name: Set AnyBody license and password
-    #   run: |
-    #     Add-Content -Path $env:GITHUB_ENV -Value "RLM_LICENSE=${{ inputs.anybody-license }}"
-    #     Add-Content -Path $env:GITHUB_ENV -Value "RLM_LICENSE_PASSWORD=${{ inputs.anybody-license-password }}"
+      if: ${{ ! contains(fromJSON('["full", "minimal", "", "none"]'), inputs.python-environment ) }}
+      run: |
+        # Set envronment variable to override AnyBody's default python path
+        Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_PATH_PYTHONHOME=$HOME\micromamba-root\envs\anybody-python"
+        # Create _pth file to instruct Python to include the all the folders in the environment
+        $pth_file = (get-item -Path "$HOME\micromamba-root\envs\anybody-python\python3??.dll").full.replace(".dll","._pth")
+        @".
+        ./Lib/
+        ./Lib/site-packages/
+        ./Scripts/
+        ./DLLs/
+        ./Library/bin/
+        "@ | Out-File -FilePath $pth_file -Encoding ascii
 
     - name: Add AnyBody to registry
       shell: pwsh
