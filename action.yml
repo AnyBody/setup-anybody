@@ -104,7 +104,7 @@ runs:
         }
         elseif ($${{ inputs.python-environment == 'minimal' }})
         {
-          ~\anybodysetup_micromamba.exe create -p "$HOME\_anybody-python" python=3.11 --quiet
+          ~\anybodysetup_micromamba.exe create -p "$HOME\_anybody-python" -c conda-forge python=3.11 --quiet
         }
         else
         {
