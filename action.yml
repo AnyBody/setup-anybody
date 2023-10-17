@@ -100,17 +100,20 @@ runs:
         
         if ($${{ inputs.python-environment == 'full' }}) 
         {
-          ~\anybodysetup_micromamba.exe create -p "$HOME\_anybody-python" -f $env:ANYBODY_INSTALL_DIR/Assist/conda-lock.yml --quiet
+          ~\anybodysetup_micromamba.exe create -p "$HOME\_anybody-python" -f $env:ANYBODY_INSTALL_DIR/Assist/conda-lock.yml
         }
         elseif ($${{ inputs.python-environment == 'minimal' }})
         {
-          ~\anybodysetup_micromamba.exe create -p "$HOME\_anybody-python" -c conda-forge python=3.11 --quiet
+          ~\anybodysetup_micromamba.exe create -p "$HOME\_anybody-python" -c conda-forge python=3.11
         }
         else
         {
           if (!(Test-Path ${{ inputs.python-environment }})) {Write-Warning "The python-environment file `"${{ inputs.python-environment }}`" does not exist"; exit 1}
-          ~\anybodysetup_micromamba.exe create -p "$HOME\_anybody-python" -f ${{ inputs.python-environment }} --quiet
+          ~\anybodysetup_micromamba.exe create -p "$HOME\_anybody-python" -f ${{ inputs.python-environment }}
         }
+        cd $HOME\_anybody-python\
+        dir
+
         # Create _pth file so AnyBody includes the all the folders in the environment
         $pth_file = (get-item -Path "$HOME\_anybody-python\python3??.dll").full.replace(".dll","._pth")
         @"
