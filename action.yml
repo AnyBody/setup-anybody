@@ -95,7 +95,8 @@ runs:
         }
         # Create _pth file so AnyBody includes the all the folders in the environment
         $pth_file = (get-item -Path "$env:ANYBODY_INSTALL_DIR\Python\python3??.dll").full.replace(".dll","._pth")
-        @".
+        @"
+        .
         ./Lib/
         ./Lib/site-packages/
         ./Scripts/
