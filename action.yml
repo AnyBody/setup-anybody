@@ -33,14 +33,7 @@ runs:
         Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_VERSION=$($ver[0]).$($ver[1])"
         Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_VERSION_PATCH=$($ver[2])"
         Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_VERSION_SUFFIX=${{ inputs.anybody-version-suffix }}"
-        if ("${{ inputs.anybody-version-suffix }}" -eq "")
-        {
-          Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_VERSION_UNDERSCORE_SUFFIX="
-        }
-        else
-        {
-          Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_VERSION_UNDERSCORE_SUFFIX=_${{ inputs.anybody-version-suffix }}"
-        }
+        Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_VERSION_UNDERSCORE_SUFFIX=${{ inputs.anybody-version-suffix && format('_{0}', inputs.anybody-version-suffix) }}"
         Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_VERSION_BUILD=${{ inputs.anybody-version-build }}"
 
     - name: Set AnyBody Install dir
