@@ -78,20 +78,20 @@ runs:
       run: | 
         ~\anybodysetup_micromamba.exe shell hook -s powershell | Out-String | iex
 
-        if (${{ inputs.python-environment == 'none' }}) {exit 0}
-        if (${{ inputs.python-environment == '' }}) {exit 0}
+        if ($${{ inputs.python-environment == 'none' }}) {exit 0}
+        if ($${{ inputs.python-environment == '' }}) {exit 0}
         
-        if (${{ inputs.python-environment == 'full' }}) 
+        if ($${{ inputs.python-environment == 'full' }}) 
         {
           ~\anybodysetup_micromamba.exe create -p $env:ANYBODY_INSTALL_DIR/Python -f $env:ANYBODY_INSTALL_DIR/Assist/conda-lock.yml --quiet
         }
-        elseif (${{ inputs.python-environment == 'minimal' }})
+        elseif ($${{ inputs.python-environment == 'minimal' }})
         {
           ~\anybodysetup_micromamba.exe create -p $env:ANYBODY_INSTALL_DIR/Python python=3.11 --quiet
         }
         else
         {
-          if (!(Test-Path ${{ inputs.python-environment }})) {Write-Warning "The file ${{ inputs.python-environment }} does not exist"}
+          if (!(Test-Path ${{ inputs.python-environment }})) {Write-Warning "The python-environment file `"${{ inputs.python-environment }}`" does not exist"; exit 1}
           ~\anybodysetup_micromamba.exe create -p $env:ANYBODY_INSTALL_DIR/Python -f ${{ inputs.python-environment }} --quiet
         }
         # Create _pth file so AnyBody includes the all the folders in the environment
