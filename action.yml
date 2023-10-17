@@ -57,7 +57,7 @@ runs:
       id: cache-anybody
       uses: actions/cache@v3
       with:
-        key: ${{ runner.os }}-anybody-$env:ANYBODY_VERSION$env:ANYBODY_VERSION_UNDERSCORE_SUFFIX$env:ANYBODY_VERSION_BUILD
+        key: ${{ runner.os }}-anybody-${{ inputs.anybody-version }}-${{ inputs.anybody-version-suffix}} ${{ inputs.anybody-version-build}}
         path: |
           ~/AnyBody Technology/AnyBody.$env:ANYBODY_VERSION$env:ANYBODY_VERSION_UNDERSCORE_SUFFIX
     
@@ -124,7 +124,7 @@ runs:
         "@ | Out-File -FilePath $pth_file -Encoding ascii
         
         # Set environment variable to override AnyBody's default python path
-        Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_PATH_PYTHONHOME=$HOME\AnyBody Technology\Python""
+        Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_PATH_PYTHONHOME=$HOME\AnyBody Technology\Python"
 
 
     - name: Add AnyBody to registry
