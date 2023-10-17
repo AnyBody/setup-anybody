@@ -112,10 +112,8 @@ runs:
           ~\anybodysetup_micromamba.exe create -p "$HOME\_anybody-python" -f ${{ inputs.python-environment }}
         }
         cd $HOME\_anybody-python\
-        dir
-
         # Create _pth file so AnyBody includes the all the folders in the environment
-        $pth_file = (get-item -Path "$HOME\_anybody-python\python3??.dll").full.replace(".dll","._pth")
+        $pth_file = (get-item -Path "python3??.dll").full.replace(".dll","._pth")
         @"
         .
         ./Lib/
