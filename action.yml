@@ -57,8 +57,8 @@ runs:
         path: |
           ~/AnyBody Technology/AnyBody.${{ env.ANYBODY_VERSION }}${{ env.ANYBODY_VERSION_UNDERSCORE_SUFFIX }}
     
-    - name: Download and extract AnyBody
-      if: ${{ steps.cache-anybody.outputs.cache-hit != 'true' }}}
+    - if: ${{ steps.cache-anybody.outputs.cache-hit != 'true' }}
+      name: Download and extract AnyBody
       shell: pwsh
       run: |
         $url = "https://anybodycloudci.blob.core.windows.net/windows-anybodycon/anybody-minimal-$env:ANYBODY_VERSION.$env:ANYBODY_VERSION_PATCH$env:ANYBODY_VERSION_UNDERSCORE_SUFFIX$env:ANYBODY_VERSION_BUILD.zip"
@@ -75,8 +75,8 @@ runs:
         path: |
           ~/.anybody-python
     
-    - name: Download and extract micro mamba
-      if: ${{ steps.cache-anybody-python.outputs.cache-hit != 'true' }}}
+    - if: ${{ steps.cache-anybody-python.outputs.cache-hit != 'true' }}
+      name: Download and extract micro mamba
       shell: pwsh
       run: | 
         Invoke-Webrequest -URI https://anaconda.org/conda-forge/micromamba/1.5.1/download/win-64/micromamba-1.5.1-0.tar.bz2 -OutFile ~\anybodysetup_micromamba.tar.bz2
@@ -86,8 +86,8 @@ runs:
         rename-item -Path ~\micromamba.exe -NewName anybodysetup_micromamba.exe
         Write-Host "##vso[task.setvariable variable=MAMBA_ROOT_PREFIX;]$HOME\anybodysetup_micromamba"
 
-    - name: Install AnyBody Python installation
-      if: ${{ steps.cache-anybody-python.outputs.cache-hit != 'true' }}}
+    - if: ${{ steps.cache-anybody-python.outputs.cache-hit != 'true' }}
+      name: Install AnyBody Python installation
       shell: pwsh
       run: | 
         ~\anybodysetup_micromamba.exe shell hook -s powershell | Out-String | iex
