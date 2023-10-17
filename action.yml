@@ -17,6 +17,10 @@ inputs:
     description: 'An environment.yml file with the python environment used by AnyBody'
     required: false
     default: ''
+  python-environment-minimal-version:
+    description: 'The minimal version of python to use in the environment.yml file'
+    required: false
+    default: '3.11'
 
 runs:
   using: "Composite"
@@ -104,16 +108,16 @@ runs:
         }
         elseif ($${{ inputs.python-environment == 'minimal' }})
         {
-          ~\anybodysetup_micromamba.exe create -p "$HOME\_anybody-python" -c conda-forge python=3.11
+          ~\anybodysetup_micromamba.exe create -p "$HOME\_anybody-python" -c conda-forge python=${{ inputs.python-environment-minimal-version }}
         }
         else
         {
           if (!(Test-Path ${{ inputs.python-environment }})) {Write-Warning "The python-environment file `"${{ inputs.python-environment }}`" does not exist"; exit 1}
           ~\anybodysetup_micromamba.exe create -p "$HOME\_anybody-python" -f ${{ inputs.python-environment }}
         }
-        cd $HOME\_anybody-python\
+        #cd $HOME\_anybody-python\
         # Create _pth file so AnyBody includes the all the folders in the environment
-        $pth_file = (get-item -Path "python3??.dll").full.replace(".dll","._pth")
+        # $pth_file = (get-item -Path "python3??.dll").full.replace(".dll","._pth")
         @"
         .
         ./Lib/
@@ -121,7 +125,7 @@ runs:
         ./Scripts/
         ./DLLs/
         ./Library/bin/
-        "@ | Out-File -FilePath $pth_file -Encoding ascii
+        "@ | Out-File -FilePath  $HOME\_anybody-python\python$( "${{ inputs.python-environment-minimal-version}}".replace(".","") )._pth -Encoding ascii
         
         # Set environment variable to override AnyBody's default python path
         Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_PATH_PYTHONHOME=$HOME\_anybody-python"
