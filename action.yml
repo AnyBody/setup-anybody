@@ -55,7 +55,7 @@ runs:
       with:
         key: ${{ runner.os }}-anybody-${{ inputs.anybody-version }}-${{ inputs.anybody-version-suffix}} ${{ inputs.anybody-version-build}}
         path: |
-          ~/AnyBody Technology/AnyBody.${{ inputs.anybody-version }}${{ inputs.anybody-version-suffix && format('_{0}', inputs.anybody-version-suffix) }}
+          ~/AnyBody Technology/AnyBody.${{ env.ANYBODY_VERSION }}${{ env.ANYBODY_VERSION_UNDERSCORE_SUFFIX }}
     
     - name: Download and extract AnyBody
       if: ${{ steps.cache-anybody.outputs.cache-hit != 'true' }}}
@@ -71,7 +71,7 @@ runs:
       id: cache-anybody-python
       uses: actions/cache@v3
       with:
-        key: ${{ runner.os }}-anybody-python-${{ inputs.python-environment }}-${{ hashFiles(inputs.python-environment) }}
+        key: ${{ runner.os }}-anybody-python-${{ inputs.anybody-version }}-${{ inputs.anybody-version-suffix}} ${{ inputs.anybody-version-build}}-${{ inputs.python-environment }}-${{ hashFiles(inputs.python-environment) }}
         path: |
           ~/.anybody-python
     
