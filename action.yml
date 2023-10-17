@@ -53,7 +53,7 @@ runs:
       id: cache-anybody
       uses: actions/cache@v3
       with:
-        key: ${{ runner.os }}-anybody-${{ inputs.anybody-version }}-${{ inputs.anybody-version-suffix}} ${{ inputs.anybody-version-build}}
+        key: ${{ runner.os }}-anybody-${{ env.ANYBODY_VERSION }}.${{ env.ANYBODY_VERSION_PATCH }}${{ env.ANYBODY_VERSION_UNDERSCORE_SUFFIX}}-${{ env.ANYBODY_VERSION_BUILD }}
         path: |
           ~/AnyBody Technology/AnyBody.${{ env.ANYBODY_VERSION }}${{ env.ANYBODY_VERSION_UNDERSCORE_SUFFIX }}
     
@@ -71,7 +71,7 @@ runs:
       id: cache-anybody-python
       uses: actions/cache@v3
       with:
-        key: ${{ runner.os }}-anybody-python-${{ inputs.anybody-version }}-${{ inputs.anybody-version-suffix}} ${{ inputs.anybody-version-build}}-${{ inputs.python-environment }}-${{ hashFiles(inputs.python-environment) }}
+        key: ${{ runner.os }}-anybody-python--${{ env.ANYBODY_VERSION }}.${{ env.ANYBODY_VERSION_PATCH }}${{ env.ANYBODY_VERSION_UNDERSCORE_SUFFIX}}-${{ env.ANYBODY_VERSION_BUILD }}-${{ inputs.python-environment }}-${{ hashFiles(inputs.python-environment) }}
         path: |
           ~/.anybody-python
     
