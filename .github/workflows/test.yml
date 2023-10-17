@@ -19,7 +19,7 @@ jobs:
               with:
                 anybody-version: "7.5.0"
                 anybody-version-suffix: "Beta"
-                python-environment: "minimal"
+                python-environment: "full"
 
             - name: Run AnyBodyCon directly
               env:
@@ -29,8 +29,8 @@ jobs:
                 anybodycon /ni
 
                     
-            - name: Install pytest
-              uses: mamba-org/setup-micromamba@v1
-              with:
-                environment-name: test-env
-                create-args: -c conda-forge python=3.12 pytest anypytools
+            # - name: Install pytest
+            #   uses: mamba-org/setup-micromamba@v1
+            #   with:
+            #     environment-name: test-env
+            #     create-args: -c conda-forge python=3.12 pytest anypytools
