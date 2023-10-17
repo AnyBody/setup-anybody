@@ -62,7 +62,7 @@ runs:
       with:
         key: ${{ runner.os }}-anybody-${{ inputs.anybody-version }}-${{ inputs.anybody-version-suffix}} ${{ inputs.anybody-version-build}}
         path: |
-          ~/AnyBody Technology/AnyBody.$env:ANYBODY_VERSION$env:ANYBODY_VERSION_UNDERSCORE_SUFFIX
+          ~/AnyBody Technology/AnyBody.${{ inputs.anybody-version }}${{ inputs.anybody-version-suffix && "_"+inputs.anybody-version-suffix }}
     
     - name: Download and extract AnyBody
       if: ${{ steps.cache-anybody.outputs.cache-hit != 'true' }}}
@@ -80,7 +80,7 @@ runs:
       with:
         key: ${{ runner.os }}-anybody-python-${{ inputs.python-environment }}-${{ hashFiles(inputs.python-environment) }}
         path: |
-          ~/AnyBody Technology/Python
+          ~/.anybody-python
     
     - name: Download and extract micro mamba
       if: ${{ steps.cache-anybody-python.outputs.cache-hit != 'true' }}}
@@ -104,18 +104,18 @@ runs:
         
         if ($${{ inputs.python-environment == 'full' }}) 
         {
-          ~\anybodysetup_micromamba.exe create -p "$HOME\_anybody-python" -f $env:ANYBODY_INSTALL_DIR/Assist/conda-lock.yml
+          ~\anybodysetup_micromamba.exe create -p "$HOME\.anybody-python" -f $env:ANYBODY_INSTALL_DIR/Assist/conda-lock.yml
         }
         elseif ($${{ inputs.python-environment == 'minimal' }})
         {
-          ~\anybodysetup_micromamba.exe create -p "$HOME\_anybody-python" -c conda-forge python=${{ inputs.python-environment-minimal-version }}
+          ~\anybodysetup_micromamba.exe create -p "$HOME\.anybody-python" -c conda-forge python=${{ inputs.python-environment-minimal-version }}
         }
         else
         {
           if (!(Test-Path ${{ inputs.python-environment }})) {Write-Warning "The python-environment file `"${{ inputs.python-environment }}`" does not exist"; exit 1}
-          ~\anybodysetup_micromamba.exe create -p "$HOME\_anybody-python" -f ${{ inputs.python-environment }}
+          ~\anybodysetup_micromamba.exe create -p "$HOME\.anybody-python" -f ${{ inputs.python-environment }}
         }
-        #cd $HOME\_anybody-python\
+        #cd $HOME\.anybody-python\
         # Create _pth file so AnyBody includes the all the folders in the environment
         # $pth_file = (get-item -Path "python3??.dll").full.replace(".dll","._pth")
         @"
@@ -125,10 +125,10 @@ runs:
         ./Scripts/
         ./DLLs/
         ./Library/bin/
-        "@ | Out-File -FilePath  "$HOME\_anybody-python\python$( '${{ inputs.python-environment-minimal-version }}'.replace('.','') )._pth" -Encoding ascii
+        "@ | Out-File -FilePath  "$HOME\.anybody-python\python$( '${{ inputs.python-environment-minimal-version }}'.replace('.','') )._pth" -Encoding ascii
         
         # Set environment variable to override AnyBody's default python path
-        Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_PATH_PYTHONHOME=$HOME\_anybody-python"
+        Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_PATH_PYTHONHOME=$HOME\.anybody-python"
 
 
     - name: Add AnyBody to registry
