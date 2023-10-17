@@ -62,7 +62,7 @@ runs:
       with:
         key: ${{ runner.os }}-anybody-${{ inputs.anybody-version }}-${{ inputs.anybody-version-suffix}} ${{ inputs.anybody-version-build}}
         path: |
-          ~/AnyBody Technology/AnyBody.${{ inputs.anybody-version }}${{ inputs.anybody-version-suffix && "_"+inputs.anybody-version-suffix }}
+          ~/AnyBody Technology/AnyBody.${{ inputs.anybody-version }}${{ inputs.anybody-version-suffix && format('_{0}', inputs.anybody-version-suffix) }}
     
     - name: Download and extract AnyBody
       if: ${{ steps.cache-anybody.outputs.cache-hit != 'true' }}}
