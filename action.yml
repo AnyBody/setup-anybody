@@ -39,19 +39,18 @@ runs:
         }
         Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_VERSION_BUILD=${{ inputs.anybody-version-build }}"
 
+    - name: Set AnyBody Install dir
+      shell: pwsh
+      run: Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_INSTALL_DIR=$HOME/AnyBody Technology/AnyBody.$env:ANYBODY_VERSION$env:ANYBODY_VERSION_UNDERSCORE_SUFFIX"
+
 
     - name: Create AnyBody Folders
       shell: pwsh
       run: |
-        mkdir "$HOME/AnyBody Technology"
-        mkdir "$HOME/AnyBody Technology/AnyBody.$($env:ANYBODY_VERSION)$env:ANYBODY_VERSION_UNDERSCORE_SUFFIX"
-        Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_INSTALL_DIR=$HOME/AnyBody Technology/AnyBody.$env:ANYBODY_VERSION$env:ANYBODY_VERSION_UNDERSCORE_SUFFIX"
-
-    - name: Exlude AnyBody from Windows Defender
-      shell: pwsh
-      run: | 
+        mkdir "$env:ANYBODY_INSTALL_DIR"
+        mkdir "$env:ANYBODY_INSTALL_DIR\Python"
         Add-MpPreference -ExclusionPath $env:ANYBODY_INSTALL_DIR
-        Add-MpPreference -ExclusionPath $HOME/micromamba/envs
+        Add-MpPreference -ExclusionPath $HOME/anybodysetup_micromamba
 
     
     - name: Download and extract AnyBody
