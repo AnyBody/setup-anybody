@@ -33,4 +33,4 @@ jobs:
               uses: mamba-org/setup-micromamba@v1
               with:
                 environment-name: test-env
-                create-args: python=3.12 pytest
+                create-args: -conda-forge python=3.12 pytest anypytools
