@@ -84,7 +84,8 @@ runs:
         $env:Path = "C:\PROGRA~1\Git\usr\bin;" + $env:Path
         tar -xvjf ~/anybodysetup_micromamba.tar.bz2 --strip-components 2 -C ~ Library/bin/micromamba.exe
         rename-item -Path ~\micromamba.exe -NewName anybodysetup_micromamba.exe
-        Write-Host "##vso[task.setvariable variable=MAMBA_ROOT_PREFIX;]$HOME\anybodysetup_micromamba"
+        write-host "MAMBA_ROOT_PREFIX=$HOME\anybody_micromamba" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf8 -Append
+
 
     - if: ${{ steps.cache-anybody-python.outputs.cache-hit != 'true' }}
       name: Install AnyBody Python installation
@@ -108,9 +109,6 @@ runs:
           if (!(Test-Path ${{ inputs.python-environment }})) {Write-Warning "The python-environment file `"${{ inputs.python-environment }}`" does not exist"; exit 1}
           ~\anybodysetup_micromamba.exe create -p "$HOME\.anybody-python" -f ${{ inputs.python-environment }}
         }
-        #cd $HOME\.anybody-python\
-        # Create _pth file so AnyBody includes the all the folders in the environment
-        # $pth_file = (get-item -Path "python3??.dll").full.replace(".dll","._pth")
         @"
         .
         ./Lib/
@@ -120,6 +118,9 @@ runs:
         ./Library/bin/
         "@ | Out-File -FilePath  "$HOME\.anybody-python\python$( '${{ inputs.python-environment-minimal-version }}'.replace('.','') )._pth" -Encoding ascii
         
+    - name: Setup AnyBody Python environment
+      shell: pwsh
+      run: |   
         # Set environment variable to override AnyBody's default python path
         Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_PATH_PYTHONHOME=$HOME\.anybody-python"
 
@@ -139,3 +140,8 @@ runs:
       shell: pwsh
       run: |
         Add-Content -Path $env:GITHUB_PATH -Value "$env:ANYBODY_INSTALL_DIR"
+
+    - name: Remove MAMBA_ROOT_PREFIX from $env:GITHUB_ENV file
+      shell: pwsh
+      run: |
+        Get-Content -Path $env:GITHUB_ENV | Where-Object { $_ -notmatch 'MAMBA_ROOT_PREFIX' } | Set-Content -Path $env:GITHUB_ENV
