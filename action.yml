@@ -125,7 +125,7 @@ runs:
         ./Scripts/
         ./DLLs/
         ./Library/bin/
-        "@ | Out-File -FilePath  $HOME\_anybody-python\python$( "${{ inputs.python-environment-minimal-version}}".replace(".","") )._pth -Encoding ascii
+        "@ | Out-File -FilePath  "$HOME\_anybody-python\python$( '${{ inputs.python-environment-minimal-version }}'.replace('.','') )._pth" -Encoding ascii
         
         # Set environment variable to override AnyBody's default python path
         Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_PATH_PYTHONHOME=$HOME\_anybody-python"
