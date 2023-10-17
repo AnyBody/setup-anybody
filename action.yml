@@ -75,7 +75,7 @@ runs:
       id: cache-anybody-python
       uses: actions/cache@v3
       with:
-        key: ${{ runner.os }}-anybody-${{ inputs.python-environment }}-${{ hashFiles(inputs.python-environment) }}
+        key: ${{ runner.os }}-anybody-python-${{ inputs.python-environment }}-${{ hashFiles(inputs.python-environment) }}
         path: |
           ~/AnyBody Technology/Python
     
@@ -113,7 +113,7 @@ runs:
           ~\anybodysetup_micromamba.exe create -p "$HOME\AnyBody Technology\Python" -f ${{ inputs.python-environment }} --quiet
         }
         # Create _pth file so AnyBody includes the all the folders in the environment
-        $pth_file = (get-item -Path "$env:ANYBODY_INSTALL_DIR\Python\python3??.dll").full.replace(".dll","._pth")
+        $pth_file = (get-item -Path "$HOME\AnyBody Technology\Python\python3??.dll").full.replace(".dll","._pth")
         @"
         .
         ./Lib/
