@@ -132,7 +132,7 @@ runs:
         New-Item -Path $registryPath -Force
         Set-ItemProperty -Path $registryPath -Name "(Default)" -Value "`"$($env:ANYBODY_INSTALL_DIR)\AnyBody.exe`" `"%1`""
 
-        $registryPath = "HKLM:\Software\AnyBody Technology\AnyBody.${{ env.ANYBODY_VERSION }} (64-bit) ${{ env:ANYBODY_VERSION_SUFFIX }}".trim()
+        $registryPath = "HKLM:\Software\AnyBody Technology\AnyBody.${{ env.ANYBODY_VERSION }} (64-bit) ${{ env.ANYBODY_VERSION_SUFFIX }}".trim()
         New-Item -Path $registryPath -Force
         New-ItemProperty -Path $registryPath -Name "InstallDir" -Value "$env:ANYBODY_INSTALL_DIR"
 
