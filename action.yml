@@ -44,7 +44,7 @@ runs:
       shell: pwsh
       run: |
         mkdir "$HOME/AnyBody Technology"
-        mkdir "$HOME/AnyBody Technology/AnyBody.$($env:ANYBODY_VERSION)_$env:ANYBODY_VERSION_UNDERSCORE_SUFFIX"
+        mkdir "$HOME/AnyBody Technology/AnyBody.$($env:ANYBODY_VERSION)$env:ANYBODY_VERSION_UNDERSCORE_SUFFIX"
         Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_INSTALL_DIR=$HOME/AnyBody Technology/AnyBody.$env:ANYBODY_VERSION$env:ANYBODY_VERSION_UNDERSCORE_SUFFIX"
 
     - name: Exlude AnyBody from Windows Defender
