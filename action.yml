@@ -48,12 +48,21 @@ runs:
       shell: pwsh
       run: |
         mkdir "$env:ANYBODY_INSTALL_DIR"
-        mkdir "$env:ANYBODY_INSTALL_DIR\Python"
+        mkdir "$HOME\AnyBody Technology\Python"
         Add-MpPreference -ExclusionPath $env:ANYBODY_INSTALL_DIR
         Add-MpPreference -ExclusionPath $HOME/anybodysetup_micromamba
 
+
+    - name: Cache AnyBody Install
+      id: cache-anybody
+      uses: actions/cache@v3
+      with:
+        key: ${{ runner.os }}-anybody-$env:ANYBODY_VERSION$env:ANYBODY_VERSION_UNDERSCORE_SUFFIX$env:ANYBODY_VERSION_BUILD
+        path: |
+          ~/AnyBody Technology/AnyBody.$env:ANYBODY_VERSION$env:ANYBODY_VERSION_UNDERSCORE_SUFFIX
     
     - name: Download and extract AnyBody
+      if: ${{ steps.cache-anybody.outputs.cache-hit != 'true' }}}
       shell: pwsh
       run: |
         $url = "https://anybodycloudci.blob.core.windows.net/windows-anybodycon/anybody-minimal-$env:ANYBODY_VERSION.$env:ANYBODY_VERSION_PATCH$env:ANYBODY_VERSION_UNDERSCORE_SUFFIX$env:ANYBODY_VERSION_BUILD.zip"
@@ -62,7 +71,16 @@ runs:
         [System.IO.Compression.ZipFile]::ExtractToDirectory("$HOME/AnyBody.zip", $env:ANYBODY_INSTALL_DIR)   
 
 
+    - name: Cache Python Install
+      id: cache-anybody-python
+      uses: actions/cache@v3
+      with:
+        key: ${{ runner.os }}-anybody-${{ inputs.python-environment }}-${{ hashFiles(inputs.python-environment) }}
+        path: |
+          ~/AnyBody Technology/Python
+    
     - name: Download and extract micro mamba
+      if: ${{ steps.cache-anybody-python.outputs.cache-hit != 'true' }}}
       shell: pwsh
       run: | 
         Invoke-Webrequest -URI https://anaconda.org/conda-forge/micromamba/1.5.1/download/win-64/micromamba-1.5.1-0.tar.bz2 -OutFile ~\anybodysetup_micromamba.tar.bz2
@@ -73,6 +91,7 @@ runs:
         Write-Host "##vso[task.setvariable variable=MAMBA_ROOT_PREFIX;]$HOME\anybodysetup_micromamba"
 
     - name: Install AnyBody Python installation
+      if: ${{ steps.cache-anybody-python.outputs.cache-hit != 'true' }}}
       shell: pwsh
       run: | 
         ~\anybodysetup_micromamba.exe shell hook -s powershell | Out-String | iex
@@ -82,16 +101,16 @@ runs:
         
         if ($${{ inputs.python-environment == 'full' }}) 
         {
-          ~\anybodysetup_micromamba.exe create -p $env:ANYBODY_INSTALL_DIR/Python -f $env:ANYBODY_INSTALL_DIR/Assist/conda-lock.yml --quiet
+          ~\anybodysetup_micromamba.exe create -p "$HOME\AnyBody Technology\Python" -f $env:ANYBODY_INSTALL_DIR/Assist/conda-lock.yml --quiet
         }
         elseif ($${{ inputs.python-environment == 'minimal' }})
         {
-          ~\anybodysetup_micromamba.exe create -p $env:ANYBODY_INSTALL_DIR/Python python=3.11 --quiet
+          ~\anybodysetup_micromamba.exe create -p "$HOME\AnyBody Technology\Python" python=3.11 --quiet
         }
         else
         {
           if (!(Test-Path ${{ inputs.python-environment }})) {Write-Warning "The python-environment file `"${{ inputs.python-environment }}`" does not exist"; exit 1}
-          ~\anybodysetup_micromamba.exe create -p $env:ANYBODY_INSTALL_DIR/Python -f ${{ inputs.python-environment }} --quiet
+          ~\anybodysetup_micromamba.exe create -p "$HOME\AnyBody Technology\Python" -f ${{ inputs.python-environment }} --quiet
         }
         # Create _pth file so AnyBody includes the all the folders in the environment
         $pth_file = (get-item -Path "$env:ANYBODY_INSTALL_DIR\Python\python3??.dll").full.replace(".dll","._pth")
@@ -103,8 +122,9 @@ runs:
         ./DLLs/
         ./Library/bin/
         "@ | Out-File -FilePath $pth_file -Encoding ascii
-        # Set environment variable to override AnyBody's default python path (may not necessary)
-        Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_PATH_PYTHONHOME=$env:ANYBODY_INSTALL_DIR/Python"
+        
+        # Set environment variable to override AnyBody's default python path
+        Add-Content -Path $env:GITHUB_ENV -Value "ANYBODY_PATH_PYTHONHOME=$HOME\AnyBody Technology\Python""
 
 
     - name: Add AnyBody to registry
