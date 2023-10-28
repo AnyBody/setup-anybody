@@ -16,7 +16,7 @@ inputs:
   python-environment: 
     description: 'An environment.yml file with the python environment used by AnyBody'
     required: false
-    default: ''
+    default: 'minimal'
   python-environment-minimal-version:
     description: 'The minimal version of python to use in the environment.yml file'
     required: false
