@@ -12,7 +12,7 @@ inputs:
   anybody-version-build:  # id of input
     description: 'The build number of the AnyBody to install'
     required: false
-    default: ''
+    default: '_latest'
   python-environment: 
     description: 'An environment.yml file with the python environment used by AnyBody'
     required: false
