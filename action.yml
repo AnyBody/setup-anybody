@@ -68,6 +68,8 @@ runs:
         [System.IO.Compression.ZipFile]::ExtractToDirectory("$env:TEMP/AnyBody.zip", "$env:TEMP/setup-anybody-action")
         #copy all files from the folder $env:TEMP/setup-anybody-action/anybody-minimal to  the folder $env:ANYBODY_INSTALL_DIR
         Copy-Item -Path "$env:TEMP/setup-anybody-action/anybody-minimal" -Destination "$env:ANYBODY_INSTALL_DIR" -Recurse -Force        
+        # Write the content of the folder $env:ANYBODY_INSTALL_DIR to the debug log
+        Get-ChildItem -Path "$env:ANYBODY_INSTALL_DIR" -Recurse | Format-Table -AutoSize | Out-String | Write-Host
 
     - name: Cache Python Install
       id: cache-anybody-python
