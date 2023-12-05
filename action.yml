@@ -66,10 +66,12 @@ runs:
       shell: pwsh
       run: |
         $url = "https://anybodycloudci.blob.core.windows.net/windows-anybodycon/anybody-minimal-$env:ANYBODY_VERSION.$env:ANYBODY_VERSION_PATCH$env:ANYBODY_VERSION_UNDERSCORE_SUFFIX$env:ANYBODY_VERSION_BUILD.zip"
-        Invoke-WebRequest -Uri $url -OutFile "$HOME/AnyBody.zip"
+        Invoke-WebRequest -Uri $url -OutFile "$env:TEMP/AnyBody.zip"
+        if (Test-Path "$env:TEMP/setup-anybody-action") {Remove-Item -Path "$env:TEMP/setup-anybody-action" -Recurse -Force}
         Add-Type -Assembly System.IO.Compression.FileSystem
-        [System.IO.Compression.ZipFile]::ExtractToDirectory("$HOME/AnyBody.zip", $env:ANYBODY_INSTALL_DIR)   
-
+        [System.IO.Compression.ZipFile]::ExtractToDirectory("$env:TEMP/AnyBody.zip", "$env:TEMP/setup-anybody-action")
+        #copy all files from the folder $env:TEMP/setup-anybody-action/anybody-minimal to  the folder $env:ANYBODY_INSTALL_DIR
+        Copy-Item -Path "$env:TEMP/setup-anybody-action/anybody-minimal" -Destination "$env:ANYBODY_INSTALL_DIR" -Recurse -Force        
 
     - name: Cache Python Install
       id: cache-anybody-python
